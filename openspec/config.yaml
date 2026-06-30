@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+- 技术栈：Python 3.10, FastAPI
+- 前端：Next.js (React 18) + TypeScript + TailwindCSS
+- LLM 接入：Anthropic API（支持 vLLM / Anthropic / 其他兼容服务）
+- 会话管理：PostgreSQL + SQLAlchemy 2.0
+- API 风格：RESTful + Streaming (Server-Sent Events)
+- 测试框架：pytest + httpx
+- 部署：Docker + Docker Compose
+- 代码风格：PEP 8 + 类型注解 + Ruff / Black
+- 领域：Web 大模型对话系统（类似 ChatGPT 的简化版）
+
+rules:
+proposal:
+- 保持提案在 500 字以内
+- 必须包含 "非目标" 部分
+- MVP 只支持单模型对话
+- 不包含复杂 Agent 或工具调用
+- UI 只实现基础聊天界面
+
+specs:
+- 每个需求必须覆盖正常和异常场景
+- 会话必须支持多轮对话上下文
+- 必须支持流式输出（SSE）
+- 用户必须能查看历史对话
+- API 错误必须返回标准 JSON 错误结构
+- LLM 请求失败必须有重试或错误提示
+- 输入内容长度必须限制
+- 必须包含基本速率限制
+
+design:
+- 必须列出考虑过的替代方案
+- 必须标注 LLM provider 抽象层设计
+- 安全决策必须标注
+- 必须说明对话上下文存储策略
+- 必须说明 streaming 实现方式
+- 必须说明 API 与前端交互结构
+
+tasks:
+- 每个任务不超过 2 小时
+- 测试任务必须与实现任务配对
+- 必须包含 API 测试
+- 必须包含对话流程端到端测试
+- 必须包含基本错误处理测试
+- 必须包含数据库迁移任务

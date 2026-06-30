@@ -51,12 +51,14 @@ Get-Content $EnvFilePath | ForEach-Object {
 $BackendPort = if ($env:BACKEND_PORT) { $env:BACKEND_PORT } else { "8001" }
 $FrontendPort = if ($env:FRONTEND_PORT) { $env:FRONTEND_PORT } else { "5173" }
 $ApiBaseUrl = if ($env:VITE_API_BASE_URL) { $env:VITE_API_BASE_URL } else { "http://localhost:$BackendPort" }
+$CondaEnv = if ($env:CONDA_ENV) { $env:CONDA_ENV } else { "myagent" }
 
 Write-Host ""
 Write-Host "Config:" -ForegroundColor Cyan
 Write-Host "  Backend Port: $BackendPort" -ForegroundColor Gray
 Write-Host "  Frontend Port: $FrontendPort" -ForegroundColor Gray
 Write-Host "  API Base URL: $ApiBaseUrl" -ForegroundColor Gray
+Write-Host "  Conda Env: $CondaEnv" -ForegroundColor Gray
 Write-Host ""
 
 # Check and start PostgreSQL if needed
@@ -102,7 +104,36 @@ if (-not (Test-Path $LogsDir)) {
 # Start backend in new PowerShell window
 Write-Host "Starting backend on port $BackendPort..." -ForegroundColor Yellow
 $BackendDir = Join-Path $ProjectRoot "backend"
-$BackendCmd = "Set-Location '$BackendDir'; python -m uvicorn app.main:app --host 0.0.0.0 --port $BackendPort"
+
+# Find myagent conda environment python path
+$CondaEnvPath = conda env list 2>$null | Select-String "^$CondaEnv\s+" | ForEach-Object {
+    ($_ -split '\s+')[-1]
+}
+if ($CondaEnvPath) {
+    $CondaPython = Join-Path $CondaEnvPath "python.exe"
+    Write-Host "  Using conda env: $CondaEnv ($CondaEnvPath)" -ForegroundColor Gray
+} else {
+    Write-Host "  Warning: conda env '$CondaEnv' not found, using system python" -ForegroundColor Yellow
+    $CondaPython = "python"
+}
+
+# Build environment variables for backend
+$EnvVars = @()
+if ($env:HF_HOME) {
+    $EnvVars += "`$env:HF_HOME='$($env:HF_HOME)'"
+    Write-Host "  HF_HOME: $($env:HF_HOME)" -ForegroundColor Gray
+}
+if ($env:HF_HUB_CACHE) {
+    $EnvVars += "`$env:HF_HUB_CACHE='$($env:HF_HUB_CACHE)'"
+}
+
+$EnvVarsStr = $EnvVars -join "; "
+if ($EnvVarsStr) {
+    $BackendCmd = "$EnvVarsStr; Set-Location '$BackendDir'; & '$CondaPython' -m uvicorn app.main:app --host 0.0.0.0 --port $BackendPort"
+} else {
+    $BackendCmd = "Set-Location '$BackendDir'; & '$CondaPython' -m uvicorn app.main:app --host 0.0.0.0 --port $BackendPort"
+}
+
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", $BackendCmd
 Write-Host "  Backend started in new window" -ForegroundColor Green
 

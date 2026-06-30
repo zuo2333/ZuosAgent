@@ -10,6 +10,20 @@ A modern, full-stack LLM chat application with multi-provider support, tool call
 - **Session Management**: Persistent chat sessions with configurable parameters
 - **Modern Frontend**: React + TypeScript + TailwindCSS
 
+## Screenshots
+
+| Main Chat Interface | Chatting |
+|:---:|:---:|
+| ![Main Chat](docs/images/1.jpg) | ![Tool Calls](docs/images/2.jpg) |
+
+| Tool calls | Settings |
+|:---:|:---:|
+| ![Session Settings](docs/images/3.jpg) | ![Provider Settings](docs/images/4.jpg) |
+
+| Session Settings |
+|:---:|
+| ![Dark Theme](docs/images/5.jpg) |
+
 ## Quick Start
 
 ### Prerequisites
